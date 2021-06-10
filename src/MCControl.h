@@ -16,6 +16,7 @@
 // These two headers must come first
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
+#include <rtm/idl/InterfaceDataTypesSkel.h>
 
 #include <rtm/CorbaPort.h>
 #include <rtm/DataFlowComponentBase.h>
@@ -152,6 +153,10 @@ protected:
   std::vector<TimedDoubleSeq *> m_wrenchesIn;
   std::vector<InPort<TimedDoubleSeq> *> m_wrenchesInIn;
   std::map<std::string, sva::ForceVecd> m_wrenches;
+
+  std::vector<std::string> m_rangeSensorsNames;
+  std::vector<RangeData *> m_rangesIn;
+  std::vector<InPort<RangeData> *> m_rangesInIn;
 
   // </rtc-template>
 

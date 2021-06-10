@@ -106,6 +106,13 @@ MCControl::MCControl(RTC::Manager* manager)
     m_wrenchesInIn.push_back(new InPort<TimedDoubleSeq>(wrenchName.c_str(), *(m_wrenchesIn[i])));
     m_wrenches[wrenchName] = sva::ForceVecd(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0));
   }
+
+  auto addRangePort = [this](const std::string & name) {
+    m_rangeSensorsNames.push_back(name);
+    m_rangesIn.push_back(new RangeData());
+    m_rangesInIn.push_back(new InPort<RangeData>(name.c_str(), *m_rangesIn.back()));
+  };
+  addRangePort("ranger");
 }
 
 MCControl::~MCControl() {}
@@ -135,6 +142,12 @@ RTC::ReturnCode_t MCControl::onInitialize()
   for(size_t i = 0; i < m_wrenchesNames.size(); ++i)
   {
     addInPort(m_wrenchesNames[i].c_str(), *(m_wrenchesInIn[i]));
+  }
+
+  // Range sensors
+  for(size_t i = 0; i < m_rangeSensorsNames.size(); ++i)
+  {
+    addInPort(m_rangeSensorsNames[i].c_str(), *(m_rangesInIn[i]));
   }
 
   // Set OutPort buffer
@@ -189,6 +202,21 @@ RTC::ReturnCode_t MCControl::onExecute(RTC::UniqueId ec_id)
             Eigen::Vector3d(m_wrenchesIn[i]->data[3], m_wrenchesIn[i]->data[4], m_wrenchesIn[i]->data[5]);
       }
     }
+  }
+  for(size_t i = 0; i < m_rangesInIn.size(); ++i)
+  {
+    if(!m_rangesInIn[i]->isNew())
+    {
+      continue;
+    }
+    m_rangesInIn[i]->read();
+    auto & ranges = m_rangesIn[i]->ranges;
+    double max = -std::numeric_limits<double>::infinity();
+    for(size_t j = 0; j < ranges.length(); ++j)
+    {
+      max = std::max<double>(max, ranges[j]);
+    }
+    mc_rtc::log::critical("MAX DISTANCE TO GROUND: {}", max);
   }
   if(m_poseInIn.isNew())
   {
