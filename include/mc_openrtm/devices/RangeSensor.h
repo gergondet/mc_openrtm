@@ -3,6 +3,7 @@
 #include <mc_openrtm/devices/api.h>
 
 #include <mc_rbdyn/Device.h>
+#include <mc_rtc/log/Logger.h>
 
 #include <rtm/idl/InterfaceDataTypesSkel.h>
 
@@ -52,6 +53,12 @@ struct MC_OPENRTM_DEVICES_DLLAPI RangeSensor : public mc_rbdyn::Device
 
   /** Update the sensor configuration and data from an OpenRTM message */
   void update(const RTC::RangeData & data);
+
+  /** Add the sensor to a logger */
+  void addToLogger(mc_rtc::Logger & logger, const std::string & prefix);
+
+  /** Remove the sensor from a logger */
+  void removeFromLogger(mc_rtc::Logger & logger);
 
   mc_rbdyn::DevicePtr clone() const override;
 

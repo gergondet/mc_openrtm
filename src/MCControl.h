@@ -16,7 +16,6 @@
 // These two headers must come first
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
-#include <rtm/idl/InterfaceDataTypesSkel.h>
 
 #include <rtm/CorbaPort.h>
 #include <rtm/DataFlowComponentBase.h>
@@ -30,6 +29,8 @@
 #include "MCControlServiceSVC_impl.h"
 
 #include <mc_control/mc_global_controller.h>
+
+#include <mc_openrtm/devices/RangeSensor.h>
 
 #include <chrono>
 
@@ -154,7 +155,7 @@ protected:
   std::vector<InPort<TimedDoubleSeq> *> m_wrenchesInIn;
   std::map<std::string, sva::ForceVecd> m_wrenches;
 
-  std::vector<std::string> m_rangeSensorsNames;
+  std::vector<mc_openrtm::RangeSensor *> m_rangeSensors;
   std::vector<RangeData *> m_rangesIn;
   std::vector<InPort<RangeData> *> m_rangesInIn;
 

@@ -29,4 +29,22 @@ void RangeSensor::update(const RTC::RangeData & data)
   }
 }
 
+void RangeSensor::addToLogger(mc_rtc::Logger & logger, const std::string & prefixIn)
+{
+  auto prefix = prefixIn.size() ? fmt::format("{}_{}_", prefixIn, name_) : name_ + "_";
+  logger.addLogEntry(prefix + "config_minAngle", this, [this]() { return config_.minAngle; });
+  logger.addLogEntry(prefix + "config_maxAngle", this, [this]() { return config_.maxAngle; });
+  logger.addLogEntry(prefix + "config_angularRes", this, [this]() { return config_.angularRes; });
+  logger.addLogEntry(prefix + "config_minRange", this, [this]() { return config_.minRange; });
+  logger.addLogEntry(prefix + "config_maxRange", this, [this]() { return config_.maxRange; });
+  logger.addLogEntry(prefix + "config_rangeRes", this, [this]() { return config_.rangeRes; });
+  logger.addLogEntry(prefix + "config_frequency", this, [this]() { return config_.frequency; });
+  logger.addLogEntry(prefix + "data", this, [this]() -> const std::vector<double> & { return data_; });
+}
+
+void RangeSensor::removeFromLogger(mc_rtc::Logger & logger)
+{
+  logger.removeLogEntries(this);
+}
+
 } // namespace mc_openrtm

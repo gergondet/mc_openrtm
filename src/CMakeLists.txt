@@ -61,3 +61,5 @@ install(TARGETS mc_openrtm_devices
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+
+target_link_libraries(MCControl PUBLIC mc_openrtm_devices)

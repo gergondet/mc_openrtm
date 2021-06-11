@@ -62,6 +62,21 @@ namespace
     }
     return false;
   }
+
+  std::vector<mc_openrtm::RangeSensor *> getRangeSensors(mc_rbdyn::Robot & robot)
+  {
+    std::vector<mc_openrtm::RangeSensor *> out;
+    const auto & module = robot.module();
+    for(const auto & s : module.devices())
+    {
+      auto sensor = dynamic_cast<mc_openrtm::RangeSensor *>(s.get());
+      if(sensor)
+      {
+        out.push_back(sensor);
+      }
+    }
+    return out;
+  }
 }
 
 MCControl::MCControl(RTC::Manager* manager)
@@ -107,12 +122,12 @@ MCControl::MCControl(RTC::Manager* manager)
     m_wrenches[wrenchName] = sva::ForceVecd(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0));
   }
 
-  auto addRangePort = [this](const std::string & name) {
-    m_rangeSensorsNames.push_back(name);
+  m_rangeSensors = getRangeSensors(controller.robot());
+  for(auto & s : m_rangeSensors)
+  {
     m_rangesIn.push_back(new RangeData());
-    m_rangesInIn.push_back(new InPort<RangeData>(name.c_str(), *m_rangesIn.back()));
-  };
-  addRangePort("ranger");
+    m_rangesInIn.push_back(new InPort<RangeData>(s->name().c_str(), *m_rangesIn.back()));
+  }
 }
 
 MCControl::~MCControl() {}
@@ -145,9 +160,10 @@ RTC::ReturnCode_t MCControl::onInitialize()
   }
 
   // Range sensors
-  for(size_t i = 0; i < m_rangeSensorsNames.size(); ++i)
+  for(size_t i = 0; i < m_rangeSensors.size(); ++i)
   {
-    addInPort(m_rangeSensorsNames[i].c_str(), *(m_rangesInIn[i]));
+    addInPort(m_rangeSensors[i]->name().c_str(), *(m_rangesInIn[i]));
+    m_rangeSensors[i]->addToLogger(controller.controller().logger(), controller.robot().name());
   }
 
   // Set OutPort buffer
@@ -210,13 +226,7 @@ RTC::ReturnCode_t MCControl::onExecute(RTC::UniqueId ec_id)
       continue;
     }
     m_rangesInIn[i]->read();
-    auto & ranges = m_rangesIn[i]->ranges;
-    double max = -std::numeric_limits<double>::infinity();
-    for(size_t j = 0; j < ranges.length(); ++j)
-    {
-      max = std::max<double>(max, ranges[j]);
-    }
-    mc_rtc::log::critical("MAX DISTANCE TO GROUND: {}", max);
+    m_rangeSensors[i]->update(*m_rangesIn[i]);
   }
   if(m_poseInIn.isNew())
   {
