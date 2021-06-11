@@ -16,6 +16,7 @@
 // These two headers must come first
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
+#include <rtm/idl/InterfaceDataTypesSkel.h>
 
 #include <rtm/CorbaPort.h>
 #include <rtm/DataFlowComponentBase.h>
